@@ -1,0 +1,7 @@
+# Copy to backend.hcl (gitignored) for local use, or supply these as
+# TF_STATE_* repo variables for CI (see .github/workflows).
+bucket         = "REPLACE_ME-tf-state"
+key            = "aws-cloudflare-connectivity/terraform.tfstate"
+region         = "eu-west-2"
+dynamodb_table = "REPLACE_ME-tf-locks"
+encrypt        = true

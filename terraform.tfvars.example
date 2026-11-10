@@ -1,0 +1,24 @@
+# Copy to terraform.tfvars and adjust as needed. terraform.tfvars is gitignored.
+#
+# Cloudflare auth: do NOT put an API token here. Export it instead:
+#   export CLOUDFLARE_API_TOKEN=xxxx
+# (Create a token in the Cloudflare dashboard scoped to: Account.Cloudflare Tunnel:Edit,
+# Account.Access: Apps and Policies:Edit if you add Access policies later.)
+
+aws_region  = "eu-west-2"
+name_prefix = "ch-tunnel"
+
+vpc_cidr              = "10.90.0.0/24"
+availability_zones     = ["eu-west-2a", "eu-west-2b"]
+public_subnet_cidrs    = ["10.90.0.0/27", "10.90.0.32/27"]
+private_subnet_cidrs   = ["10.90.0.64/27", "10.90.0.96/27"]
+
+instance_type       = "t3.small"
+clickhouse_hostname = "y714fbcb7t.eu-west-2.aws.clickhouse.cloud"
+clickhouse_port     = 8443
+
+# Resolve with: dig +short y714fbcb7t.eu-west-2.aws.clickhouse.cloud
+clickhouse_ip = "REPLACE_ME"
+
+cloudflare_account_id  = "faacb9c6245c9054b5a65b390d990d22"
+cloudflare_tunnel_name = "aws-hub-clickhouse"

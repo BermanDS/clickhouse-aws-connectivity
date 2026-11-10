@@ -1,0 +1,66 @@
+name: (Module) Terraform Plan/Apply
+
+run-name: "[${{ inputs.action }}] ${{ inputs.module }}"
+
+permissions:
+  contents: read
+  id-token: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      module:
+        description: "Module folder under modules/ to target"
+        required: true
+        default: "aws-cloudflare-connectivity"
+      action:
+        description: "plan or apply"
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - apply
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.action == 'apply' && 'production' || '' }}
+    defaults:
+      run:
+        working-directory: modules/${{ inputs.module }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'eu-west-2' }}
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
+            -backend-config="key=modules/${{ inputs.module }}/terraform.tfstate" \
+            -backend-config="region=${{ vars.TF_STATE_REGION || 'eu-west-2' }}" \
+            -backend-config="dynamodb_table=${{ vars.TF_STATE_LOCK_TABLE }}"
+
+      - name: Terraform Plan
+        if: inputs.action == 'plan'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          TF_VAR_clickhouse_ip: ${{ vars.CLICKHOUSE_IP }}
+        run: terraform plan -no-color -input=false
+
+      - name: Terraform Apply
+        if: inputs.action == 'apply'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          TF_VAR_clickhouse_ip: ${{ vars.CLICKHOUSE_IP }}
+        run: terraform apply -auto-approve -input=false

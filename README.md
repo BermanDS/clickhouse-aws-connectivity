@@ -10,7 +10,7 @@ tooling).
 
 | Module | Purpose |
 |---|---|
-| [`aws-cloudflare-connectivity`](modules/aws-cloudflare-connectivity) | Cloudflare Tunnel (ECS Fargate `cloudflared`) connectivity from a Cloudflare Zero Trust org to a ClickHouse Cloud instance hosted on AWS |
+| [`aws-cloudflare-connectivity`](modules/aws-cloudflare-connectivity) | Cloudflare Tunnel + Private Network route from a Cloudflare Zero Trust org to a ClickHouse Cloud instance hosted on AWS (no AWS compute — `cloudflared` runs on your own infra, e.g. Azure) |
 
 Add further modules as new folders under `modules/` — the workflows below
 pick up any folder containing `.tf` files automatically.
